@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>World Cup 2026 比分预测</title>
-    <link rel="stylesheet" href="styles.css?v=20260617-sync-proxy" />
+    <link rel="stylesheet" href="styles.css?v=20260617-live-unplayed" />
   </head>
   <body>
     <div class="app-shell">
@@ -39,7 +39,7 @@
           <article class="panel metric-panel">
             <p class="eyebrow">预测覆盖</p>
             <div class="metric-value" id="coverageMetric">0</div>
-            <p class="metric-caption">已有具体球队名称的未来比赛</p>
+            <p class="metric-caption">未完赛且可预测的比赛</p>
           </article>
 
           <article class="panel metric-panel">
@@ -67,7 +67,7 @@
           <label>
             比赛状态
             <select id="statusFilter">
-              <option value="future">未来比赛</option>
+              <option value="future">未完赛/进行中</option>
               <option value="all">全部比赛</option>
               <option value="played">已完赛/有测试比分</option>
             </select>
@@ -179,6 +179,6 @@
       </div>
     </template>
 
-    <script src="app.js?v=20260617-sync-proxy"></script>
+    <script src="app.js?v=20260617-live-unplayed"></script>
   </body>
 </html>

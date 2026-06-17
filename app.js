@@ -504,11 +504,11 @@ function render() {
 }
 
 function renderOverview(now) {
-  const futureKnown = FIXTURES.filter(match => isKnownMatch(match) && new Date(match.date) > now);
-  const next = futureKnown[0] || FIXTURES.find(isKnownMatch);
+  const unplayedKnown = FIXTURES.filter(isUnplayedKnownMatch);
+  const next = unplayedKnown[0] || FIXTURES.find(isKnownMatch);
   const prediction = next ? predictMatch(next) : null;
 
-  elements.coverageMetric.textContent = futureKnown.length;
+  elements.coverageMetric.textContent = unplayedKnown.length;
   elements.modelMetric.textContent = Object.keys(calibratedProfiles).length ? '已校准' : '基础';
 
   if (lastEvaluation) {
@@ -543,12 +543,12 @@ function filteredFixtures(now) {
 
   return FIXTURES.filter(match => {
     const real = scoreFor(match);
-    const isFuture = new Date(match.date) > now && isKnownMatch(match);
+    const isUnplayed = !real && isKnownMatch(match);
     const isPlayed = real !== null;
     const text = normalizeSearch(`${match.home} ${match.away} ${zh(match.home)} ${zh(match.away)} ${match.stage}`);
     if (term && !text.includes(term)) return false;
     if (stage !== 'all' && match.stage !== stage) return false;
-    if (status === 'future' && !isFuture) return false;
+    if (status === 'future' && !isUnplayed) return false;
     if (status === 'played' && !isPlayed) return false;
     return true;
   });
@@ -592,10 +592,12 @@ function renderFixtureModeChrome() {
 }
 
 function renderForecastRows(matches) {
+  const now = new Date();
   return matches.map(match => {
     const prediction = isKnownMatch(match) ? predictMatch(match) : null;
     const real = scoreFor(match);
     const comparison = prediction && real ? comparePrediction(prediction, real) : null;
+    const state = matchStateInfo(match, now);
     const date = new Intl.DateTimeFormat('zh-CN', {
       month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'
     }).format(new Date(match.date));
@@ -604,6 +606,7 @@ function renderForecastRows(matches) {
       <td>
         <strong>${date}</strong>
         <div class="match-meta">${stageLabel(match.stage)} #${match.match}</div>
+        <span class="match-state ${state.className}">${state.label}</span>
       </td>
       <td>
         <div class="match-cell">
@@ -622,12 +625,14 @@ function renderForecastRows(matches) {
 }
 
 function renderHistoryRows(matches) {
+  const now = new Date();
   return matches.map(match => {
     const prediction = isKnownMatch(match) ? predictMatch(match) : null;
     const real = scoreFor(match);
     const comparison = prediction && real ? comparePrediction(prediction, real) : null;
     const actualOutcome = real ? outcome(real.home, real.away) : null;
     const rps = prediction && actualOutcome ? rankedProbabilityScore(prediction, actualOutcome) : null;
+    const state = matchStateInfo(match, now);
     const date = new Intl.DateTimeFormat('zh-CN', {
       month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'
     }).format(new Date(match.date));
@@ -636,6 +641,7 @@ function renderHistoryRows(matches) {
       <td>
         <strong>${date}</strong>
         <div class="match-meta">${stageLabel(match.stage)} #${match.match}</div>
+        <span class="match-state ${state.className}">${state.label}</span>
       </td>
       <td>
         <div class="match-cell">
@@ -1325,6 +1331,17 @@ function matchKey(home, away) {
 
 function isKnownMatch(match) {
   return !/^\d|To be announced/.test(match.home) && !/^\d|To be announced/.test(match.away);
+}
+
+function isUnplayedKnownMatch(match) {
+  return isKnownMatch(match) && !scoreFor(match);
+}
+
+function matchStateInfo(match, now = new Date()) {
+  if (scoreFor(match)) return {label:'已完赛', className:'state-played'};
+  if (!isKnownMatch(match)) return {label:'待定', className:'state-pending'};
+  if (new Date(match.date) <= now) return {label:'进行中/待完赛', className:'state-live'};
+  return {label:'未开赛', className:'state-upcoming'};
 }
 
 function stageLabel(stage) {

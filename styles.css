@@ -417,6 +417,42 @@ th {
   font-size: 12px;
 }
 
+.match-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin-top: 7px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.state-live {
+  background: #fff2d6;
+  color: #9a6a12;
+  border: 1px solid #e6bf69;
+}
+
+.state-upcoming {
+  background: #eef2f4;
+  color: var(--muted);
+  border: 1px solid #d4ded9;
+}
+
+.state-played {
+  background: #e7f6ee;
+  color: var(--green);
+  border: 1px solid #acdcbc;
+}
+
+.state-pending {
+  background: #f1eef4;
+  color: #65556f;
+  border: 1px solid #d8cede;
+}
+
 .compare-hit,
 .compare-miss,
 .compare-pending {
