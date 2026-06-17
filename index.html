@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World Cup 2026 比分预测</title>
+    <link rel="stylesheet" href="styles.css?v=20260617-sync-proxy" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">World Cup 2026 Forecast Lab</p>
+          <h1>世界杯 2026 比赛比分预测</h1>
+        </div>
+        <div class="source-note">
+          <span>赛程种子：FixtureDownload 2026</span>
+          <span>时间：自动按本机时区显示</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="dashboard-grid" aria-label="预测概览">
+          <article class="panel next-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">下一场可预测比赛</p>
+                <h2 id="nextMatchTitle">加载中</h2>
+              </div>
+              <span id="nextMatchBadge" class="badge">未来</span>
+            </div>
+            <div class="scoreline" id="nextScoreline">-- : --</div>
+            <div class="prob-row" id="nextProbabilities"></div>
+            <div class="pitch-visual" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+          </article>
+
+          <article class="panel metric-panel">
+            <p class="eyebrow">预测覆盖</p>
+            <div class="metric-value" id="coverageMetric">0</div>
+            <p class="metric-caption">已有具体球队名称的未来比赛</p>
+          </article>
+
+          <article class="panel metric-panel">
+            <p class="eyebrow">测试准确性</p>
+            <div class="metric-value" id="accuracyMetric">--</div>
+            <p class="metric-caption" id="accuracyCaption">粘贴最近比分后自动评估</p>
+          </article>
+
+          <article class="panel metric-panel">
+            <p class="eyebrow">模型状态</p>
+            <div class="metric-value" id="modelMetric">基础</div>
+            <p class="metric-caption">可用真实比分微调球队近期状态</p>
+          </article>
+        </section>
+
+        <section class="controls" aria-label="筛选">
+          <label>
+            搜索球队
+            <input id="searchInput" type="search" placeholder="例如：阿根廷、France、巴西" />
+          </label>
+          <label>
+            分组/阶段
+            <select id="groupFilter"></select>
+          </label>
+          <label>
+            比赛状态
+            <select id="statusFilter">
+              <option value="future">未来比赛</option>
+              <option value="all">全部比赛</option>
+              <option value="played">已完赛/有测试比分</option>
+            </select>
+          </label>
+          <div class="sync-control">
+            <button id="refreshScoresButton" type="button">刷新比分</button>
+            <span id="scoreSyncStatus">使用本地内置比分</span>
+          </div>
+          <button id="resetModelButton" class="ghost-button" type="button">重置校准</button>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel fixture-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">赛程预测</p>
+                <h2 id="fixturePanelTitle">自动预测未来对战比分</h2>
+              </div>
+              <div class="fixture-heading-actions">
+                <div class="mode-toggle" aria-label="赛程视图切换">
+                  <button id="forecastModeButton" class="mode-button active" type="button">自动预测</button>
+                  <button id="historyModeButton" class="mode-button" type="button">历史对战比分</button>
+                </div>
+                <span id="fixtureCount" class="badge">0 场</span>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr id="fixtureHeaderRow">
+                    <th>时间</th>
+                    <th>对阵</th>
+                    <th>预测</th>
+                    <th>胜平负</th>
+                    <th>关键因素</th>
+                    <th>真实比分</th>
+                    <th>比分对比</th>
+                    <th>胜负对比</th>
+                  </tr>
+                </thead>
+                <tbody id="fixtureRows"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="side-stack">
+            <article class="panel test-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">中文测试数据</p>
+                  <h2>用最近比分测准确性</h2>
+                </div>
+              </div>
+              <textarea id="resultInput" spellcheck="false"></textarea>
+              <div class="button-row">
+                <button id="loadSampleButton" type="button">载入最近样例</button>
+                <button id="evaluateButton" type="button">测试准确率</button>
+                <button id="calibrateButton" class="accent-button" type="button">用比分校准</button>
+              </div>
+              <div id="testSummary" class="test-summary"></div>
+            </article>
+
+            <article class="panel model-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">模型因素</p>
+                  <h2>当前参考维度</h2>
+                </div>
+              </div>
+              <ul class="factor-list">
+                <li><strong>球员实力</strong><span>阵容深度、核心球员、攻防能力</span></li>
+                <li><strong>教练能力</strong><span>临场调整、杯赛经验、纪律性</span></li>
+                <li><strong>战术匹配</strong><span>压迫强度、转换速度、低位防守适应</span></li>
+                <li><strong>历史数据</strong><span>国际大赛 Elo、世界杯/洲际杯稳定性</span></li>
+                <li><strong>近期状态</strong><span>最近比分会改变 form 与进攻/防守参数</span></li>
+                <li><strong>赛程环境</strong><span>主办国加成、旅行、淘汰赛保守度</span></li>
+              </ul>
+              <div id="playerModelSummary" class="player-model-summary"></div>
+            </article>
+
+            <article class="panel standings-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">实力榜</p>
+                  <h2>球队预测强度</h2>
+                </div>
+              </div>
+              <div id="teamPowerList" class="team-list"></div>
+            </article>
+
+            <article class="panel stars-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">明星球员权重</p>
+                  <h2>代表性球员候选</h2>
+                </div>
+              </div>
+              <div id="starPlayerList" class="star-list"></div>
+            </article>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <template id="probTemplate">
+      <div class="prob-item">
+        <span></span>
+        <b></b>
+      </div>
+    </template>
+
+    <script src="app.js?v=20260617-sync-proxy"></script>
+  </body>
+</html>
