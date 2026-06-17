@@ -2,6 +2,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 import json
+import os
 
 
 SCORE_FEED_URL = "https://fixturedownload.com/feed/json/fifa-world-cup-2026"
@@ -45,6 +46,8 @@ class WorldCupHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer(("127.0.0.1", 4173), WorldCupHandler)
-    print("WorldCup app server running at http://127.0.0.1:4173/")
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "4173"))
+    server = ThreadingHTTPServer((host, port), WorldCupHandler)
+    print(f"WorldCup app server running on {host}:{port}")
     server.serve_forever()
